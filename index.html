@@ -183,7 +183,7 @@
   <div>
     <button class="toggle-btn" id="toggle-btn" onclick="toggleLog()">▼ 記録一覧を見る（0件）</button>
     <div class="log-list" id="log-list" style="display:none">
-      <div class="log-empty" id="log-empty">まだ記録がありません</div>
+
     </div>
   </div>
 
@@ -307,9 +307,10 @@ function updateUI() {
 
 function renderLog() {
   const container = document.getElementById('log-list');
-  const emptyEl = document.getElementById('log-empty');
-  if (log.length === 0) { emptyEl.style.display = ''; return; }
-  emptyEl.style.display = 'none';
+  if (log.length === 0) {
+    container.innerHTML = '<div class="log-empty">まだ記録がありません</div>';
+    return;
+  }
   container.innerHTML = [...log].reverse().map(e => `
     <div class="log-row">
       <span class="log-steps">${e.steps.toLocaleString()}回</span>
@@ -318,6 +319,7 @@ function renderLog() {
       <button class="del-btn" onclick="deleteEntry(${e.id})" title="削除">×</button>
     </div>
   `).join('');
+
 }
 
 function addEntry() {
