@@ -78,7 +78,7 @@
   .flash.ok { color: #5a9a5a; }
   .flash.err { color: #cc4444; }
 
-  .input-row { display: flex; gap: 10px; margin-bottom: 8px; }
+  .input-row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 8px; }
   .step-input {
     flex: 1; padding: 12px 14px; border-radius: 10px;
     border: 1.5px solid var(--border); font-size: 16px;
@@ -87,7 +87,7 @@
   }
   .step-input:focus { border-color: var(--accent); }
   .add-btn {
-    padding: 12px 18px; border-radius: 10px; border: none;
+    padding: 14px; border-radius: 10px; border: none; width: 100%;
     background: linear-gradient(135deg, var(--accent), var(--accent2));
     color: white; font-weight: 700; font-size: 15px;
     cursor: pointer; font-family: inherit; transition: opacity 0.15s, transform 0.1s; flex-shrink: 0;
