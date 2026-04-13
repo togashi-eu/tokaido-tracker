@@ -176,7 +176,7 @@
       <input type="number" class="step-input" id="step-input" placeholder="ステップ数を入力" min="1" />
       <button class="add-btn" onclick="addEntry()">追加</button>
     </div>
-    <div class="hint" id="hint">※ 1ストライド = 30cm で計算</div>
+    <div class="hint" id="hint">※ 1歩 = 約71cm（身長157cm基準）</div>
   </div>
 
   <div>
@@ -249,7 +249,7 @@ const STATIONS = [
 ];
 
 const GOAL = 495.5;
-const STRIDE = 0.0003;
+const STRIDE = 0.000706; // 157cm × 0.45 = 約70.6cm
 const STORAGE_KEY = 'tokaido-log-v1';
 let log = [];
 let showLog = false;
@@ -329,7 +329,7 @@ function addEntry() {
   log.push(entry);
   const ok = saveLog();
   input.value = '';
-  document.getElementById('hint').textContent = '※ 1ストライド = 30cm で計算';
+  document.getElementById('hint').textContent = '※ 1歩 = 約71cm（身長157cm基準）';
   document.getElementById('hint').className = 'hint';
   const flash = document.getElementById('flash');
   flash.textContent = ok ? '✓ 保存しました' : '⚠ 保存失敗';
@@ -354,8 +354,8 @@ function toggleLog() {
 document.getElementById('step-input').addEventListener('input', function() {
   const n = parseInt(this.value);
   const hint = document.getElementById('hint');
-  if (n > 0) { hint.textContent = `→ ${(n * STRIDE).toFixed(3)} km 進みます`; hint.className = 'hint preview'; }
-  else { hint.textContent = '※ 1ストライド = 30cm で計算'; hint.className = 'hint'; }
+  if (n > 0) { hint.textContent = `→ ${(n * STRIDE).toFixed(3)} km 進みます（1歩≈71cm）`; hint.className = 'hint preview'; }
+  else { hint.textContent = '※ 1歩 = 約71cm（身長157cm基準）'; hint.className = 'hint'; }
 });
 
 document.getElementById('step-input').addEventListener('keydown', e => { if (e.key === 'Enter') addEntry(); });
