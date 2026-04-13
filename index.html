@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>東海道五十三次 ウォーキングトラッカー</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #f5f0e8;
+    --card: #ffffff;
+    --card-inner: #fdf8f0;
+    --border: #e8dfc8;
+    --text: #2a1e0e;
+    --text2: #7a5e38;
+    --text3: #b09060;
+    --accent: #c8955a;
+    --accent2: #e8b870;
+    --accent-light: #fdf0e0;
+  }
+
+  body {
+    background: var(--bg);
+    font-family: 'Noto Serif JP', 'Georgia', serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 28px 16px 40px;
+    color: var(--text);
+  }
+
+  .wrap { width: 100%; max-width: 460px; display: flex; flex-direction: column; gap: 14px; }
+
+  .header { text-align: center; margin-bottom: 6px; }
+  .header .eyebrow { font-size: 10px; letter-spacing: 5px; color: var(--text3); margin-bottom: 6px; }
+  .header h1 { font-size: 24px; font-weight: 700; letter-spacing: 3px; color: var(--text); }
+  .header .route { font-size: 12px; color: var(--text3); margin-top: 5px; letter-spacing: 1px; }
+
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 22px 20px; }
+
+  .km-display { text-align: center; margin-bottom: 18px; }
+  .km-display .num { font-size: 48px; font-weight: 700; color: var(--text); line-height: 1; letter-spacing: -1px; }
+  .km-display .unit { font-size: 13px; color: var(--text3); margin-top: 3px; }
+
+  .bar-section { margin-bottom: 16px; }
+  .bar-bg { background: var(--border); border-radius: 10px; height: 13px; overflow: hidden; margin-bottom: 7px; }
+  .bar-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 10px;
+    transition: width 0.7s cubic-bezier(.4,0,.2,1);
+    min-width: 0;
+  }
+  .bar-labels { display: flex; justify-content: space-between; font-size: 11px; color: var(--text3); }
+  .bar-pct { font-weight: 700; color: var(--accent); }
+
+  .station-box { background: var(--card-inner); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+  .station-label { font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+  .station-row { display: flex; align-items: center; gap: 10px; }
+  .station-icon { width: 36px; height: 36px; background: var(--accent-light); border: 1px solid var(--border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .station-name { font-size: 20px; font-weight: 700; color: var(--text); }
+  .station-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .next-info { font-size: 12px; color: var(--text3); margin-top: 10px; }
+  .next-info strong { color: var(--accent); font-weight: 700; }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+  .stat-cell { background: var(--card-inner); border: 1px solid var(--border); border-radius: 10px; padding: 10px 4px; text-align: center; }
+  .stat-val { font-size: 18px; font-weight: 700; color: var(--text); }
+  .stat-unit { font-size: 10px; color: var(--text3); }
+  .stat-lbl { font-size: 9px; color: var(--text3); margin-top: 1px; }
+
+  .input-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+  .input-header .lbl { font-size: 12px; color: var(--text2); font-weight: 700; }
+  .flash { font-size: 11px; font-weight: 700; min-width: 80px; text-align: right; }
+  .flash.ok { color: #5a9a5a; }
+  .flash.err { color: #cc4444; }
+
+  .input-row { display: flex; gap: 10px; margin-bottom: 8px; }
+  .step-input {
+    flex: 1; padding: 12px 14px; border-radius: 10px;
+    border: 1.5px solid var(--border); font-size: 16px;
+    font-family: inherit; background: var(--card-inner);
+    color: var(--text); outline: none; transition: border-color 0.2s;
+  }
+  .step-input:focus { border-color: var(--accent); }
+  .add-btn {
+    padding: 12px 22px; border-radius: 10px; border: none;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: white; font-weight: 700; font-size: 15px;
+    cursor: pointer; font-family: inherit; transition: opacity 0.15s, transform 0.1s;
+  }
+  .add-btn:hover { opacity: 0.88; }
+  .add-btn:active { transform: scale(0.97); }
+  .hint { font-size: 11px; color: var(--text3); }
+  .hint.preview { color: var(--accent); }
+
+  .toggle-btn {
+    width: 100%; padding: 12px; border-radius: 12px;
+    border: 1.5px solid var(--border); background: var(--card);
+    color: var(--text2); font-size: 13px; cursor: pointer;
+    font-family: inherit; transition: background 0.15s;
+  }
+  .toggle-btn:hover { background: var(--card-inner); }
+
+  .log-list {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; margin-top: 8px;
+    max-height: 300px; overflow-y: auto;
+  }
+  .log-row { display: flex; align-items: center; padding: 10px 16px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .log-row:last-child { border-bottom: none; }
+  .log-steps { font-weight: 700; color: var(--text); }
+  .log-m { color: var(--text3); margin-left: 8px; }
+  .log-date { font-size: 11px; color: var(--text3); margin-left: auto; margin-right: 10px; }
+  .del-btn { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 18px; padding: 0 4px; line-height: 1; transition: color 0.15s; }
+  .del-btn:hover { color: #cc4444; }
+  .log-empty { padding: 22px; text-align: center; color: var(--text3); font-size: 13px; }
+
+  .footer { text-align: center; font-size: 10px; color: var(--text3); margin-top: 4px; }
+  .goal-msg { color: var(--accent); font-weight: 700; font-size: 13px; margin-top: 8px; }
+
+  @media (max-width: 400px) {
+    .km-display .num { font-size: 38px; }
+    .stat-val { font-size: 15px; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="eyebrow">TŌKAIDŌ GOJŪSAN-TSUGI</div>
+    <h1>東海道五十三次</h1>
+    <div class="route">日本橋 → 三条大橋 495.5km</div>
+  </div>
+
+  <div class="card">
+    <div class="km-display">
+      <div class="num" id="km-display">0.00</div>
+      <div class="unit">km 歩破</div>
+    </div>
+    <div class="bar-section">
+      <div class="bar-bg"><div class="bar-fill" id="bar-fill" style="width:0%"></div></div>
+      <div class="bar-labels">
+        <span>日本橋</span>
+        <span class="bar-pct" id="bar-pct">0.00%</span>
+        <span>三条大橋</span>
+      </div>
+    </div>
+    <div class="station-box">
+      <div class="station-label" id="station-label">現在地（0 / 54 宿）</div>
+      <div class="station-row">
+        <div class="station-icon">📍</div>
+        <div>
+          <div class="station-name" id="station-name">日本橋</div>
+          <div class="station-sub" id="station-sub">東京都中央区 / 0km地点</div>
+        </div>
+      </div>
+      <div class="next-info" id="next-info"></div>
+    </div>
+    <div class="stats-grid">
+      <div class="stat-cell"><div class="stat-val" id="stat-steps">0</div><div class="stat-unit">回</div><div class="stat-lbl">合計回数</div></div>
+      <div class="stat-cell"><div class="stat-val" id="stat-days">0</div><div class="stat-unit">日</div><div class="stat-lbl">記録日数</div></div>
+      <div class="stat-cell"><div class="stat-val" id="stat-remain">495.5</div><div class="stat-unit">km</div><div class="stat-lbl">残り距離</div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="input-header">
+      <span class="lbl">今日の記録を追加</span>
+      <span class="flash" id="flash"></span>
+    </div>
+    <div class="input-row">
+      <input type="number" class="step-input" id="step-input" placeholder="ステップ数を入力" min="1" />
+      <button class="add-btn" onclick="addEntry()">追加</button>
+    </div>
+    <div class="hint" id="hint">※ 1ストライド = 30cm で計算</div>
+  </div>
+
+  <div>
+    <button class="toggle-btn" id="toggle-btn" onclick="toggleLog()">▼ 記録一覧を見る（0件）</button>
+    <div class="log-list" id="log-list" style="display:none">
+      <div class="log-empty" id="log-empty">まだ記録がありません</div>
+    </div>
+  </div>
+
+  <div class="footer">宿場町：54宿 | 総距離：495.5km | データはこのブラウザに保存されます</div>
+</div>
+
+<script>
+const STATIONS = [
+  { name: "日本橋",    km: 0,     pref: "東京都中央区" },
+  { name: "品川",      km: 7.9,   pref: "東京都品川区" },
+  { name: "川崎",      km: 17.7,  pref: "神奈川県川崎市" },
+  { name: "神奈川",    km: 27.5,  pref: "神奈川県横浜市" },
+  { name: "保土ヶ谷",  km: 32.4,  pref: "神奈川県横浜市" },
+  { name: "戸塚",      km: 41.2,  pref: "神奈川県横浜市" },
+  { name: "藤沢",      km: 49.1,  pref: "神奈川県藤沢市" },
+  { name: "平塚",      km: 62.8,  pref: "神奈川県平塚市" },
+  { name: "大磯",      km: 65.8,  pref: "神奈川県中郡大磯町" },
+  { name: "小田原",    km: 81.5,  pref: "神奈川県小田原市" },
+  { name: "箱根",      km: 98.1,  pref: "神奈川県足柄下郡箱根町" },
+  { name: "三島",      km: 112.9, pref: "静岡県三島市" },
+  { name: "沼津",      km: 118.8, pref: "静岡県沼津市" },
+  { name: "原",        km: 124.7, pref: "静岡県沼津市" },
+  { name: "吉原",      km: 136.5, pref: "静岡県富士市" },
+  { name: "蒲原",      km: 147.7, pref: "静岡県静岡市清水区" },
+  { name: "由比",      km: 151.6, pref: "静岡県静岡市清水区" },
+  { name: "興津",      km: 160.8, pref: "静岡県静岡市清水区" },
+  { name: "江尻",      km: 164.9, pref: "静岡県静岡市清水区" },
+  { name: "府中",      km: 175.5, pref: "静岡県静岡市葵区" },
+  { name: "丸子",      km: 181.2, pref: "静岡県静岡市駿河区" },
+  { name: "岡部",      km: 189.0, pref: "静岡県藤枝市" },
+  { name: "藤枝",      km: 195.8, pref: "静岡県藤枝市" },
+  { name: "島田",      km: 204.5, pref: "静岡県島田市" },
+  { name: "金谷",      km: 208.4, pref: "静岡県島田市" },
+  { name: "日坂",      km: 215.0, pref: "静岡県掛川市" },
+  { name: "掛川",      km: 222.1, pref: "静岡県掛川市" },
+  { name: "袋井",      km: 231.7, pref: "静岡県袋井市" },
+  { name: "見付",      km: 237.6, pref: "静岡県磐田市" },
+  { name: "浜松",      km: 254.0, pref: "静岡県浜松市" },
+  { name: "舞阪",      km: 265.0, pref: "静岡県浜松市西区" },
+  { name: "新居",      km: 270.8, pref: "静岡県湖西市" },
+  { name: "白須賀",    km: 277.4, pref: "静岡県湖西市" },
+  { name: "二川",      km: 283.2, pref: "愛知県豊橋市" },
+  { name: "吉田",      km: 289.3, pref: "愛知県豊橋市" },
+  { name: "御油",      km: 299.5, pref: "愛知県豊川市" },
+  { name: "赤坂",      km: 301.3, pref: "愛知県豊川市" },
+  { name: "藤川",      km: 310.1, pref: "愛知県岡崎市" },
+  { name: "岡崎",      km: 316.8, pref: "愛知県岡崎市" },
+  { name: "池鯉鮒",    km: 331.8, pref: "愛知県知立市" },
+  { name: "鳴海",      km: 342.9, pref: "愛知県名古屋市緑区" },
+  { name: "宮（熱田）", km: 349.4, pref: "愛知県名古屋市熱田区" },
+  { name: "桑名",      km: 376.9, pref: "三重県桑名市" },
+  { name: "四日市",    km: 389.6, pref: "三重県四日市市" },
+  { name: "石薬師",    km: 400.4, pref: "三重県鈴鹿市" },
+  { name: "庄野",      km: 403.1, pref: "三重県鈴鹿市" },
+  { name: "亀山",      km: 411.0, pref: "三重県亀山市" },
+  { name: "関",        km: 416.9, pref: "三重県亀山市" },
+  { name: "坂下",      km: 423.4, pref: "三重県亀山市" },
+  { name: "土山",      km: 433.2, pref: "滋賀県甲賀市" },
+  { name: "水口",      km: 443.8, pref: "滋賀県甲賀市" },
+  { name: "石部",      km: 457.5, pref: "滋賀県湖南市" },
+  { name: "草津",      km: 469.3, pref: "滋賀県草津市" },
+  { name: "大津",      km: 483.7, pref: "滋賀県大津市" },
+  { name: "三条大橋",  km: 495.5, pref: "京都府京都市東山区" },
+];
+
+const GOAL = 495.5;
+const STRIDE = 0.0003;
+const STORAGE_KEY = 'tokaido-log-v1';
+let log = [];
+let showLog = false;
+
+function loadLog() {
+  try { const s = localStorage.getItem(STORAGE_KEY); return s ? JSON.parse(s) : []; }
+  catch { return []; }
+}
+
+function saveLog() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(log)); return true; }
+  catch { return false; }
+}
+
+function getStation(km) {
+  for (let i = 0; i < STATIONS.length - 1; i++) {
+    if (km >= STATIONS[i].km && km < STATIONS[i+1].km)
+      return { cur: STATIONS[i], nxt: STATIONS[i+1] };
+  }
+  if (km >= STATIONS[STATIONS.length-1].km) return { cur: STATIONS[STATIONS.length-1], nxt: null };
+  return { cur: STATIONS[0], nxt: STATIONS[1] };
+}
+
+function updateUI() {
+  const totalKm = log.reduce((a, e) => a + e.km, 0);
+  const pct = Math.min(totalKm / GOAL * 100, 100);
+  const { cur, nxt } = getStation(totalKm);
+  const passed = STATIONS.filter(s => totalKm >= s.km).length;
+  const totalSteps = log.reduce((a, e) => a + e.steps, 0);
+  const days = new Set(log.map(e => e.date)).size;
+
+  document.getElementById('km-display').textContent = totalKm.toFixed(2);
+  document.getElementById('bar-fill').style.width = pct.toFixed(4) + '%';
+  document.getElementById('bar-pct').textContent = pct.toFixed(2) + '%';
+  document.getElementById('station-label').textContent = `現在地（${passed} / ${STATIONS.length} 宿）`;
+  document.getElementById('station-name').textContent = cur.name;
+  document.getElementById('station-sub').textContent = `${cur.pref} / ${cur.km}km地点`;
+
+  const nextEl = document.getElementById('next-info');
+  if (nxt) {
+    nextEl.innerHTML = `次の宿場 → <strong>${nxt.name}</strong>（あと ${(nxt.km - totalKm).toFixed(2)}km）`;
+  } else {
+    nextEl.innerHTML = `<span class="goal-msg">🎉 ゴール！三条大橋に到着しました！</span>`;
+  }
+
+  document.getElementById('stat-steps').textContent = totalSteps.toLocaleString();
+  document.getElementById('stat-days').textContent = days;
+  document.getElementById('stat-remain').textContent = Math.max(0, GOAL - totalKm).toFixed(1);
+  document.getElementById('toggle-btn').textContent =
+    (showLog ? '▲ 記録を閉じる' : '▼ 記録一覧を見る') + `（${log.length}件）`;
+
+  renderLog();
+}
+
+function renderLog() {
+  const container = document.getElementById('log-list');
+  const emptyEl = document.getElementById('log-empty');
+  if (log.length === 0) { emptyEl.style.display = ''; return; }
+  emptyEl.style.display = 'none';
+  container.innerHTML = [...log].reverse().map(e => `
+    <div class="log-row">
+      <span class="log-steps">${e.steps.toLocaleString()}回</span>
+      <span class="log-m">= ${Math.round(e.km * 1000)}m</span>
+      <span class="log-date">${e.date}</span>
+      <button class="del-btn" onclick="deleteEntry(${e.id})" title="削除">×</button>
+    </div>
+  `).join('');
+}
+
+function addEntry() {
+  const input = document.getElementById('step-input');
+  const n = parseInt(input.value);
+  if (!n || n <= 0) { input.focus(); return; }
+  const entry = { id: Date.now(), steps: n, km: n * STRIDE, date: new Date().toLocaleDateString('ja-JP') };
+  log.push(entry);
+  const ok = saveLog();
+  input.value = '';
+  document.getElementById('hint').textContent = '※ 1ストライド = 30cm で計算';
+  document.getElementById('hint').className = 'hint';
+  const flash = document.getElementById('flash');
+  flash.textContent = ok ? '✓ 保存しました' : '⚠ 保存失敗';
+  flash.className = 'flash ' + (ok ? 'ok' : 'err');
+  setTimeout(() => { flash.textContent = ''; flash.className = 'flash'; }, 2200);
+  updateUI();
+}
+
+function deleteEntry(id) {
+  if (!confirm('この記録を削除しますか？')) return;
+  log = log.filter(e => e.id !== id);
+  saveLog();
+  updateUI();
+}
+
+function toggleLog() {
+  showLog = !showLog;
+  document.getElementById('log-list').style.display = showLog ? '' : 'none';
+  updateUI();
+}
+
+document.getElementById('step-input').addEventListener('input', function() {
+  const n = parseInt(this.value);
+  const hint = document.getElementById('hint');
+  if (n > 0) { hint.textContent = `→ ${(n * STRIDE).toFixed(3)} km 進みます`; hint.className = 'hint preview'; }
+  else { hint.textContent = '※ 1ストライド = 30cm で計算'; hint.className = 'hint'; }
+});
+
+document.getElementById('step-input').addEventListener('keydown', e => { if (e.key === 'Enter') addEntry(); });
+
+log = loadLog();
+updateUI();
+</script>
+</body>
+</html>
